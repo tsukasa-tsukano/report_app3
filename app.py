@@ -1,3 +1,4 @@
+import re
 from flask import Flask, render_template, session, request, redirect, url_for
 import os
 from werkzeug.utils import secure_filename
@@ -20,11 +21,13 @@ def index():
 
 @app.route('/edit', methods=["POST"])
 def edit():
-    #ファイルを取り出す
+    #取り出す
     report = request.files['report']
-
-    #ファイルを取り出す
     this_year = request.files["this_year"]
+    last_year = request.files["last_year"]
+    single_item = request.files["single_item"]
+    month = request.form['month']
+    souninji = request.form['souninji']
 
     #今年の売上合計照会のCSVファイルを取得
     this_year_csv = pd.read_csv(this_year,encoding="shift-jis")
@@ -45,10 +48,161 @@ def edit():
     sheet["J10"] = tensuu
     sheet["D7"] = zituarari
 
+    #CSVファイルを取得（昨年）
+    last_year_csv = pd.read_csv(last_year, encoding="shift-jis")
+
+    #客数と点数と実粗利の取得
+    sakunen_kyakusuu = last_year_csv.loc[0]["客数"]
+    sakunen_tensuu = last_year_csv.loc[0]["点数"]
+    sakunen_zituarari = last_year_csv.loc[0]["実粗利"]
+
+    #シートに書き込む
+    sheet["H8"] = sakunen_kyakusuu
+    sheet["J11"] = sakunen_tensuu
+    sheet["D10"] = sakunen_zituarari
+
+    #予算の取得
+    yosan = sheet['B29'].value
+
+    #予算の書き込み
+    sheet["B6"] = yosan
+
+    #CSVファイルを取得
+    single_item_csv = pd.read_csv(single_item,encoding='cp932')
+
+    #点数でソート
+    tensuu_sort = single_item_csv.sort_values("点数", ascending=False)
+
+    #CSVファイルに出力する
+    tensuu_sort.to_csv("export.csv",encoding = 'cp932', index = False)
+
+    #CSVファイルを取得
+    csv_tensuu = pd.read_csv("export.csv",encoding='cp932')
+
+    csv_tensuu_true = csv_tensuu.loc[1:10,["点数"]]
+
+    #シートに書き込む
+    num1 = list(range(19, 29))
+    num2 = list(range(1, 11))
+
+    for i, j in zip(num1, num2):
+        sheet.cell(row=i, column=12).value = csv_tensuu_true.loc[j]["点数"]
+    
+    #品名に上書き
+    csv_tensuu_true = csv_tensuu.loc[1:10,["品名"]]
+
+    #シートに書き込む
+    for i, j in zip(num1, num2):
+        sheet.cell(row=i, column=11).value = csv_tensuu_true.loc[j]["品名"]
+
+    #粗利でソート
+    arari_sort = single_item_csv.sort_values("粗利", ascending=False)
+
+    #CSVファイルに出力する
+    arari_sort.to_csv("export.csv",encoding = 'cp932', index = False)
+
+    #CSVファイルを取得
+    arari_csv = pd.read_csv("export.csv",encoding='cp932')
+
+    arari_csv_true = arari_csv.loc[1:10,["品名"]]
+
+    #シートに書き込む
+    for i, j in zip(num1, num2):
+        sheet.cell(row=i, column=10).value = arari_csv_true.loc[j]["品名"]
+
+    #売上でソート
+    uriage_sort = single_item_csv.sort_values("売上", ascending=False)
+
+    #CSVファイルに出力する
+    uriage_sort.to_csv("export.csv",encoding = 'cp932', index = False)
+
+    #CSVファイルを取得
+    uriage_csv = pd.read_csv("export.csv",encoding='cp932')
+
+    uriage_csv_true = uriage_csv.loc[1:10,["品名"]]
+
+    #シートに書き込む
+    for i, j in zip(num1, num2):
+        sheet.cell(row=i, column=9).value = uriage_csv_true.loc[j]["品名"]
+
+    #月度入力
+    month_list = list(month)
+    month_list_slice = month_list[5:8]
+    month_list_join = ''.join(month_list_slice)
+    month_int = int(month_list_join)
+    sheet["H3"] = month_int
+
+    if month_int == 1:
+        sheet["J3"] = "12月21日"
+        sheet["L3"] = "1月20日"
+        sheet["B11"] = "30"
+
+    elif month_int == 2:
+        sheet["J3"] = "1月21日"
+        sheet["L3"] = "2月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 3:
+        sheet["J3"] = "2月21日"
+        sheet["L3"] = "3月20日"
+        sheet["B11"] = "28"
+
+    elif month_int == 4:
+        sheet["J3"] = "3月21日"
+        sheet["L3"] = "4月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 5:
+        sheet["J3"] = "4月21日"
+        sheet["L3"] = "5月20日"
+        sheet["B11"] = "30"
+
+    elif month_int == 6:
+        sheet["J3"] = "5月21日"
+        sheet["L3"] = "6月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 7:
+        sheet["J3"] = "6月21日"
+        sheet["L3"] = "7月20日"
+        sheet["B11"] = "30"
+
+    elif month_int == 8:
+        sheet["J3"] = "7月21日"
+        sheet["L3"] = "8月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 9:
+        sheet["J3"] = "8月21日"
+        sheet["L3"] = "9月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 10:
+        sheet["J3"] = "9月21日"
+        sheet["L3"] = "10月20日"
+        sheet["B11"] = "30"
+
+    elif month_int == 11:
+        sheet["J3"] = "10月21日"
+        sheet["L3"] = "11月20日"
+        sheet["B11"] = "31"
+
+    elif month_int == 12:
+        sheet["J3"] = "11月21日"
+        sheet["L3"] = "12月20日"
+        sheet["B11"] = "30"
+
+    #総人時入力
+    sheet["B12"] = souninji
+
     #パスを作成
     result_file_path = 'report_dir/' + '編集済月度報告書.xlsx'
 
     #シートを上書き保存する
-    report.save(result_file_path)
+    book.save(result_file_path)
 
     return send_from_directory('report_dir','編集済月度報告書.xlsx', as_attachment=True)
+
+#アプリケーションの起動
+if __name__ == '__main__':
+    app.run(debug=True)
