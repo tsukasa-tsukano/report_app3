@@ -8,10 +8,13 @@
         <h1>月度報告書を簡単に作りたい</h1>
         <!-- アップロードされたファイルを/registerにPOSTメソッドで送信 -->
         <form method="POST" action="/edit" enctype="multipart/form-data">
-            <!-- アップロードするファイルのタイトル名を入力 -->
-            <h3>月度報告書</h3><input type="file" name="report">
             <!-- アップロードするファイルを登録する -->
+            <h3>作成する報告書の月度を選択</h3><input type="month" name="month">
+            <h3>総人時を入力</h3><input type="number" name="souninji">
+            <h3>月度報告書</h3><input type="file" name="report">
             <h3>今年の売上合計照会</h3><input type="file" name="this_year">
+            <h3>昨年の売上合計照会</h3><input type="file" name="last_year">
+            <h3>売上単品集計</h3><input type="file" name="single_item">
             <!-- 行間を開けるための改行タグ -->
             <br>
             <br>
