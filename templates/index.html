@@ -3,18 +3,31 @@
     <head>
         <meta charset="utf-8">
         <title>月度報告書ツール</title>
+        <link href="/static/css/jquery-ui.css" rel="stylesheet">
+        <link href="/static/css/jquery-ui.multidatespicker.css" rel="stylesheet">
     </head>
     <body>
-        <h1>月度報告書を簡単に作りたい</h1>
+        <h2>月度報告ツール（仮）</h2>
+        <a href="/how_to_use" target="_blank">使いかたはこちらをクリック</a>
         <!-- アップロードされたファイルを/registerにPOSTメソッドで送信 -->
         <form method="POST" action="/edit" enctype="multipart/form-data">
             <!-- アップロードするファイルを登録する -->
             <h3>作成する報告書の月度を選択</h3><input type="month" name="month">
             <h3>総人時を入力</h3><input type="number" name="souninji">
+            <h3>今月度の売上予算を入力</h3><input type="number" name="kongetudo_uriage">
+            <h3>今月度の営業利益予算を入力</h3><input type="number" name="kongetudo_rieki">
             <h3>月度報告書</h3><input type="file" name="report">
             <h3>今年の売上合計照会</h3><input type="file" name="this_year">
             <h3>昨年の売上合計照会</h3><input type="file" name="last_year">
             <h3>売上単品集計</h3><input type="file" name="single_item">
+            <h3>日付別売上</h3>
+            <input type = "file" name = "hibetsu">
+            <h3>チラシ日を選択</h3><div id="mdp-demo"></div>
+            <input type="text" name="day" id="altField">
+            <script src="/static/js/jquery-2.1.1.js"></script>
+            <script src="/static/js/jquery-ui-1.11.1.js"></script>
+            <script src="/static/js/jquery-ui.multidatespicker.js"></script>
+            <script src="/static/js/index.js"></script>
             <!-- 行間を開けるための改行タグ -->
             <br>
             <br>
