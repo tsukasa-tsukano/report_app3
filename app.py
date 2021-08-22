@@ -135,6 +135,31 @@ def edit():
     for i, j in zip(num1, num2):
         sheet.cell(row=i, column=9).value = uriage_csv_true.loc[j]["品名"]
 
+    #カレンダーのリクエストをリスト化
+    list_day = day.split(", ")
+
+    #今年の売上合計照会のCSVファイルを取得
+    hibetsu_csv = pd.read_csv(hibetsu,encoding="shift-jis")
+
+    #1行目の合計値を削除
+    hibetsu_csv = hibetsu_csv.drop([0])
+    #営業日数を書き込む
+    sheet["B11"] = len(hibetsu_csv)
+    #チラシ日を除外する
+    hibetsu_csv = hibetsu_csv[~hibetsu_csv["日付"].isin(list_day)]
+    #平日日数を書き込む
+    sheet["D11"] = len(hibetsu_csv)
+
+    #シートに書き込む
+    sheet["B21"] = "{:,}".format(hibetsu_csv["税抜売上(純額)"].sum())
+    sheet["C21"] = "{:,}".format(hibetsu_csv["実粗利"].sum())
+    sheet["D21"] = "{:,}".format(hibetsu_csv["客数"].sum())
+    sheet["E21"] = "{:,}".format(hibetsu_csv["点数"].sum())
+
+    for row in sheet["B21:E21"]:
+        for cell in row:
+            cell.alignment = Alignment(horizontal="right")
+
     #月度入力
     month_list = list(month)
     month_list_slice = month_list[5:8]
@@ -145,6 +170,7 @@ def edit():
     if month_int == 1:
         sheet["J3"] = "12月21日"
         sheet["L3"] = "1月20日"
+        sheet["B11"] = 30
 
     elif month_int == 2:
         sheet["J3"] = "1月21日"
@@ -192,32 +218,7 @@ def edit():
 
     #総人時入力
     sheet["B12"] = souninji
-
-    #カレンダーのリクエストをリスト化
-    list_day = day.split(", ")
-
-    #今年の売上合計照会のCSVファイルを取得
-    hibetsu_csv = pd.read_csv(hibetsu,encoding="shift-jis")
-
-    #1行目の合計値を削除
-    hibetsu_csv = hibetsu_csv.drop([0])
-    #営業日数を書き込む
-    sheet["B11"] = len(hibetsu_csv)
-    #チラシ日を除外する
-    hibetsu_csv = hibetsu_csv[~hibetsu_csv["日付"].isin(list_day)]
-    #平日日数を書き込む
-    sheet["D11"] = len(hibetsu_csv)
-
-    #シートに書き込む
-    sheet["B21"] = "{:,}".format(hibetsu_csv["税抜売上(純額)"].sum())
-    sheet["C21"] = "{:,}".format(hibetsu_csv["実粗利"].sum())
-    sheet["D21"] = "{:,}".format(hibetsu_csv["客数"].sum())
-    sheet["E21"] = "{:,}".format(hibetsu_csv["点数"].sum())
-
-    for row in sheet["B21:E21"]:
-        for cell in row:
-            cell.alignment = Alignment(horizontal="right")
-
+    
     #パスを作成
     result_file_path = 'report_dir/' + '編集済月度報告書.xlsx'
 
